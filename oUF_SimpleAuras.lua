@@ -64,7 +64,6 @@ button.isPlayer - indicates if the aura caster is the player or their vehicle (b
 local _, ns = ...
 local oUF = ns.oUF
 
-local LCD = LibStub("LibClassicDurations", true)
 local weaponWatchTimer
 local mainHandEnd, mainHandDuration, mainHandCharges, offHandEnd, offHandDuration, offHandCharges
 
@@ -72,48 +71,44 @@ local mainHandEnd, mainHandDuration, mainHandCharges, offHandEnd, offHandDuratio
 local weaponEnchantData = {
 	[2684] = 3600, -- +100 Attack Power vs Undead (60 min)
 	[2685] = 3600, -- +60 Spell Power vs Undead (60 min)
+	[2629] = 3600, -- Brilliant Mana Oil (60 min)
+	[2625] = 3600, -- Lesser Mana Oil (60 min)
+	[2624] = 3600, -- Minor Mana Oil (60 min)
+	[2677] = 3600, -- Superior Mana Oil (60 min)
+	[2626] = 3600, -- Lesser Wizard Oil (60 min)
+	[2623] = 3600, -- Minor Wizard Oil (60 min)
+	[2678] = 3600, -- Superior Wizard Oil (60 min)
+	[2627] = 3600, -- Wizard Oil (60 min)
 	[263] = 600,   -- Fishing +25 (10 min)
 	[264] = 600,   -- Fishing +50 (10 min)
 	[265] = 600,   -- Fishing +75 (10 min)
-	[266] = 300,   -- Fishing +100 (5 min)
-	[5] = 300,     -- Flametongue 1 (5 min)
-	[4] = 300,     -- Flametongue 2 (5 min)
-	[3] = 300,     -- Flametongue 3 (5 min)
-	[523] = 300,   -- Flametongue 4 (5 min)
-	[1665] = 300,  -- Flametongue 5 (5 min)
-	[1666] = 300,  -- Flametongue 6 (5 min)
-	[2634] = 300,  -- Flametongue 7 (5 min)
+	[266] = 600,   -- Fishing +100 (10 min)
 	[124] = 10,    -- Flametongue Totem 1 (10 sec)
 	[285] = 10,    -- Flametongue Totem 2 (10 sec)
 	[543] = 10,    -- Flametongue Totem 3 (10 sec)
 	[1683] = 10,   -- Flametongue Totem 4 (10 sec)
 	[2637] = 10,   -- Flametongue Totem 5 (10 sec)
-	[2] = 300,     -- Frostbrand 1 (5 min)
-	[12] = 300,    -- Frostbrand 2 (5 min)
-	[524] = 300,   -- Frostbrand 3 (5 min)
-	[1667] = 300,  -- Frostbrand 4 (5 min)
-	[1668] = 300,  -- Frostbrand 5 (5 min)
-	[2635] = 300,  -- Frostbrand 6 (5 min)
-	[29] = 300,    -- Rockbiter 1 (5 min)
-	[6] = 300,     -- Rockbiter 2 (5 min)
-	[1] = 300,     -- Rockbiter 3 (5 min)
-	[503] = 300,   -- Rockbiter 4 (5 min)
-	[1663] = 300,  -- Rockbiter 5 (5 min)
-	[683] = 300,   -- Rockbiter 6 (5 min)
-	[1664] = 300,  -- Rockbiter 7 (5 min)
-	[2632] = 300,  -- Rockbiter 8 (5 min)
-	[2633] = 300,  -- Rockbiter 9 (5 min)
-	[283] = 300,   -- Windfury 1 (5 min)
-	[284] = 300,   -- Windfury 2 (5 min)
-	[525] = 300,   -- Windfury 3 (5 min)
-	[1669] = 300,  -- Windfury 4 (5 min)
-	[2636] = 300,  -- Windfury 5 (5 min)
 	[1783] = 10,   -- Windfury Totem 1 (10 sec)
 	[563] = 10,    -- Windfury Totem 2 (10 sec)
 	[564] = 10,    -- Windfury Totem 3 (10 sec)
 	[2638] = 10,   -- Windfury Totem 4 (10 sec)
 	[2639] = 10,   -- Windfury Totem 5 (10 sec)
 	[1003] = 300,  -- Venomhide Poison (5 min)
+	[40] = 3600,   -- Rough Sharpening Stone (60 min)
+	[13] = 3600,   -- Coarse Sharpening Stone (60 min)
+	[14] = 3600,   -- Heavy Sharpening Stone (60 min)
+	[483] = 3600,  -- Solid Sharpening Stone (60 min)
+	[1643] = 3600, -- Dense Sharpening Stone (60 min)
+	[2506] = 3600, -- Elemental Sharpening Stone (60 min)
+	[2712] = 3600, -- Fel Sharpening Stone (60 min)
+	[2713] = 3600, -- Adamantite Sharpening Stone (60 min)
+	[19] = 3600,   -- Rough Weightstone (60 min)
+	[20] = 3600,   -- Coarse Weightstone (60 min)
+	[21] = 3600,   -- Heavy Weightstone (60 min)
+	[484] = 3600,  -- Solid Weightstone (60 min)
+	[1703] = 3600, -- Dense Weightstone (60 min)
+	[2954] = 3600, -- Fel Weightstone (60 min)
+	[2955] = 3600, -- Adamantite Weightstone (60 min)
 }
 
 local function UpdateTooltip(self)
@@ -201,20 +196,7 @@ local function updateIcon(element, unit, index, position, filter, isDebuff)
 			name, texture, count, debuffType, duration, expiration, caster = "OffHandEnchant", GetInventoryItemTexture("player", index), offHandCharges, nil, offHandDuration, offHandEnd, "player"
 		end
 	else
-		if LCD and not UnitIsUnit("player", unit) then
-			local durationNew, expirationTimeNew
-			name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3 = LCD:UnitAura(unit, index, filter)
-
-			if spellID then
-				durationNew, expirationTimeNew = LCD:GetAuraDurationByUnit(unit, spellID, caster, name)
-			end
-
-			if durationNew and durationNew > 0 then
-				duration, expiration = durationNew, expirationTimeNew
-			end
-		else
-			name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
-		end
+		name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
 	end
 
 	if element.forceShow or element.forceCreate then
@@ -362,7 +344,7 @@ local function UpdateAuras(self, event, unit)
 		local button
 		if element.buffs then
 			for i=1,32 do
-				local name, _, _, _, _, _, caster = LCD:UnitAura(self.unit, i, filter)
+				local name, _, _, _, _, _, caster = UnitAura(self.unit, i, filter)
 				if name or element.forceShow then
 					if element.buffFilter ~= 2 or caster == "player" then
 						updateIcon(element, self.unit, i, currentSlot, filter, false)
@@ -394,7 +376,7 @@ local function UpdateAuras(self, event, unit)
 		filter = "HARMFUL"..(element.debuffFilter == 3 and "|RAID" or "")
 		if element.debuffs then
 			for i=1,16 do
-				local name, _, _, _, _, _, caster = LCD:UnitAura(self.unit, i, filter)
+				local name, _, _, _, _, _, caster = UnitAura(self.unit, i, filter)
 				if name or element.forceShow then
 					if element.debuffFilter ~= 2 or caster == "player" then
 						updateIcon(element, self.unit, i, currentSlot, filter, true)
@@ -826,10 +808,6 @@ local function Enable(self)
 			playerFrames[self] = self
 			self:RegisterEvent("UNIT_INVENTORY_CHANGED", SetWeaponUpdateTimer)
 			UpdateWeaponEnchants(self, true)
-		elseif self.unit ~= "player" then
-			LCD.RegisterCallback("LUF", "UNIT_BUFF", function(event, unit)
-				UpdateAuras(element, "UNIT_AURA", unit)
-			end)
 		end
 
 		element.buffFrame = element.buffFrame or CreateFrame("Frame", "$parentBuffFrame", element)
