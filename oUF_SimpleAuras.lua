@@ -18,6 +18,8 @@ Yawt.
 .weapons            - Show weapon buffs. Works on player only (boolean)
 .buffAnchor         - Valid anchors are: "TOP", "BOTTOM", "LEFT", "RIGHT", "INSIDE", "INSIDECENTER"
 .debuffAnchor       - Valid anchors are: "TOP", "BOTTOM", "LEFT", "RIGHT", "INSIDE", "INSIDECENTER"
+.buffOffset         - Y axis offset for "inside" anchors for buffs
+.debuffOffset       - Y axis offset for "inside" anchors for debuffs
 .timer              - Show cooldown spiral (string)
                       "all"        - All auras have timers
                       "self"       - Only own auras have timers
@@ -568,7 +570,7 @@ local function Update(self, event, unit)
 				if not button:IsVisible() then break end
 				button:ClearAllPoints()
 				if i == 1 then
-					button:SetPoint("TOPLEFT", element, "TOPLEFT", 1, -1)
+					button:SetPoint("TOPLEFT", element, "TOPLEFT", 1, -1 + (element.buffOffset or 0))
 					rowLenght = element.buffSize + element.spacing
 					firstButton = button
 				elseif (rowLenght + element.buffSize) <= frameWidth then
@@ -587,7 +589,7 @@ local function Update(self, event, unit)
 				if not button:IsVisible() then break end
 				button:ClearAllPoints()
 				if i == 1 then
-					button:SetPoint("BOTTOMLEFT", element, "LEFT", 1, 0)
+					button:SetPoint("BOTTOMLEFT", element, "LEFT", 1, (element.buffOffset or 0))
 					rowLenght = element.buffSize + element.spacing
 					firstButton = button
 				elseif (rowLenght + element.buffSize) <= frameWidth then
@@ -725,7 +727,7 @@ local function Update(self, event, unit)
 				if not button:IsVisible() then break end
 				button:ClearAllPoints()
 				if i == 1 then
-					button:SetPoint("BOTTOMLEFT", element, "BOTTOMLEFT", 1, 1)
+					button:SetPoint("BOTTOMLEFT", element, "BOTTOMLEFT", 1, 1 + (element.debuffOffset or 0))
 					rowLenght = element.debuffSize + element.spacing
 					firstButton = button
 				elseif (rowLenght + element.debuffSize) <= frameWidth then
@@ -743,7 +745,7 @@ local function Update(self, event, unit)
 				if not button:IsVisible() then break end
 				button:ClearAllPoints()
 				if i == 1 then
-					button:SetPoint("TOPLEFT", element, "LEFT", 1, 0)
+					button:SetPoint("TOPLEFT", element, "LEFT", 1, (element.debuffOffset or 0))
 					rowLenght = element.debuffSize + element.spacing
 					firstButton = button
 				elseif (rowLenght + element.debuffSize) <= frameWidth then
